@@ -161,8 +161,8 @@ void main() {
 
   vec3 b1 = GAMMA_TO_LINEAR(vec3(0.02, 0.075, 0.01));
   vec3 b2 = GAMMA_TO_LINEAR(vec3(0.025, 0.1, 0.01));
-  vec3 t1 = GAMMA_TO_LINEAR(vec3(0.25, 0.5, 0.15));
-  vec3 t2 = GAMMA_TO_LINEAR(vec3(0.3, 0.6, 0.2));
+  vec3 t1 = GAMMA_TO_LINEAR(vec3(0.25, 0.3, 0.15));
+  vec3 t2 = GAMMA_TO_LINEAR(vec3(0.3, 0.4, 0.2));
 
   vec3 baseColour = mix(b1, b2, hashGrassColour.x);
   vec3 tipColour = mix(t1, t2, hashGrassColour.y);
