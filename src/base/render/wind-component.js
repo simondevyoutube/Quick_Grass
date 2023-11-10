@@ -78,7 +78,7 @@ export class WindComponent extends entity.Component {
     this.#geometry_ = this.#CreateGeometry_();
 
     const textureLoader = new THREE.TextureLoader();
-    const albedo = textureLoader.load('./resources/textures/' + 'dust.png');
+    const albedo = textureLoader.load('./textures/' + 'dust.png');
     albedo.colorSpace = THREE.SRGBColorSpace;
 
     this.#material_ = new shaders.ShaderMaterial('WIND', {

@@ -26,7 +26,7 @@ export async function loadShaders() {
 
   const globalShadersCode = [];
   for (let i = 0; i < globalShaders.length; ++i) {
-    globalShadersCode.push(await loadText('resources/shaders/' + globalShaders[i]));
+    globalShadersCode.push(await loadText('shaders/' + globalShaders[i]));
   }
 
   const loadShader = async (url) => {
@@ -39,43 +39,43 @@ export async function loadShaders() {
   }
 
   ShaderManager.shaderCode['PHONG'] = {
-    vsh: await loadShader('resources/shaders/phong-lighting-model-vsh.glsl'),
-    fsh: await loadShader('resources/shaders/phong-lighting-model-fsh.glsl'),
+    vsh: await loadShader('shaders/phong-lighting-model-vsh.glsl'),
+    fsh: await loadShader('shaders/phong-lighting-model-fsh.glsl'),
   };
 
   ShaderManager.shaderCode['GRASS'] = {
-    vsh: await loadShader('resources/shaders/grass-lighting-model-vsh.glsl'),
-    fsh: await loadShader('resources/shaders/grass-lighting-model-fsh.glsl'),
+    vsh: await loadShader('shaders/grass-lighting-model-vsh.glsl'),
+    fsh: await loadShader('shaders/grass-lighting-model-fsh.glsl'),
   };
 
   ShaderManager.shaderCode['TERRAIN'] = {
-    vsh: await loadShader('resources/shaders/terrain-lighting-model-vsh.glsl'),
-    fsh: await loadShader('resources/shaders/terrain-lighting-model-fsh.glsl'),
+    vsh: await loadShader('shaders/terrain-lighting-model-vsh.glsl'),
+    fsh: await loadShader('shaders/terrain-lighting-model-fsh.glsl'),
   };
 
   ShaderManager.shaderCode['BUGS'] = {
-    vsh: await loadShader('resources/shaders/bugs-lighting-model-vsh.glsl'),
-    fsh: await loadShader('resources/shaders/bugs-lighting-model-fsh.glsl'),
+    vsh: await loadShader('shaders/bugs-lighting-model-vsh.glsl'),
+    fsh: await loadShader('shaders/bugs-lighting-model-fsh.glsl'),
   };
 
   ShaderManager.shaderCode['WIND'] = {
-    vsh: await loadShader('resources/shaders/wind-lighting-model-vsh.glsl'),
-    fsh: await loadShader('resources/shaders/wind-lighting-model-fsh.glsl'),
+    vsh: await loadShader('shaders/wind-lighting-model-vsh.glsl'),
+    fsh: await loadShader('shaders/wind-lighting-model-fsh.glsl'),
   };
 
   ShaderManager.shaderCode['SKY'] = {
-    vsh: await loadShader('resources/shaders/sky-lighting-model-vsh.glsl'),
-    fsh: await loadShader('resources/shaders/sky-lighting-model-fsh.glsl'),
+    vsh: await loadShader('shaders/sky-lighting-model-vsh.glsl'),
+    fsh: await loadShader('shaders/sky-lighting-model-fsh.glsl'),
   };
 
   ShaderManager.shaderCode['WATER'] = {
-    vsh: await loadShader('resources/shaders/water-lighting-model-vsh.glsl'),
-    fsh: await loadShader('resources/shaders/water-lighting-model-fsh.glsl'),
+    vsh: await loadShader('shaders/water-lighting-model-vsh.glsl'),
+    fsh: await loadShader('shaders/water-lighting-model-fsh.glsl'),
   };
 
   ShaderManager.shaderCode['WATER-TEXTURE'] = {
-    vsh: await loadShader('resources/shaders/water-texture-vsh.glsl'),
-    fsh: await loadShader('resources/shaders/water-texture-fsh.glsl'),
+    vsh: await loadShader('shaders/water-texture-vsh.glsl'),
+    fsh: await loadShader('shaders/water-texture-fsh.glsl'),
   };
 } 
 

@@ -18,5 +18,6 @@ export default defineConfig({
         hmr: {
             clientPort: 5200,
         }
-    }
+    },
+    base: "/Quick_Grass/"
 });

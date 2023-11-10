@@ -1,7 +1,7 @@
 import { THREE, RenderPass, ShaderPass, FXAAShader, ACESFilmicToneMappingShader } from './three-defs.js';
 import {N8AOPass} from "n8ao";
 
-import * as Stats from 'stats.js';
+import Stats from 'three/examples/jsm/libs/stats.module.js';
 
 import * as entity from "./entity.js";
 import * as light_component from './render/light-component.js';
@@ -209,9 +209,6 @@ export const threejs_component = (() => {
       this.#transparentCamera_ = new THREE.PerspectiveCamera(fov, aspect, near, far);
       this.#transparentScene_.add(this.#transparentCamera_);
 
-      this.listener_ = new THREE.AudioListener();
-      this.#opaqueCamera_.add(this.listener_);
-
       this.uiCamera_ = new THREE.OrthographicCamera(
           -1, 1, 1, -1, 1, 1000);
       this.uiScene_ = new THREE.Scene();
@@ -342,8 +339,8 @@ export const threejs_component = (() => {
       hemiLight.SetActive(false);
       hemiLight.Init(this.Parent);
 
-      this.grassStats_ = new Stats.Panel('Grass MS', '#0f0', '#020');
       this.stats_ = new Stats();
+      this.grassStats_ = new Stats.Panel('Grass MS', '#0f0', '#020');
       this.stats_.addPanel(this.grassStats_);
       this.stats_.showPanel(0);
       document.body.appendChild(this.stats_.dom);
@@ -470,8 +467,8 @@ export const threejs_component = (() => {
           this.grassTimingAvg_ = this.grassTimingAvg_ * 0.9 + elapsedTimeInMs * 0.1;
           // console.log(`Render time: ${this.grassTimingAvg_}ms`);
           this.grassStats_.update(elapsedTimeInMs, 10);
-          this.timerQuery = null;
         }
+        this.timerQuery = null;
       }
 
       this.#ssaoPass_.clear = false;

@@ -91,7 +91,7 @@ export class BugsComponent extends entity.Component {
     this.#geometry_ = this.#CreateGeometry_();
 
     const textureLoader = new THREE.TextureLoader();
-    const albedo = textureLoader.load('./resources/textures/' + 'moth.png');
+    const albedo = textureLoader.load('./textures/' + 'moth.png');
     albedo.colorSpace = THREE.SRGBColorSpace;
 
     // // this.#grassMaterialLow_.setVec4('grassDraw', new THREE.Vector4(

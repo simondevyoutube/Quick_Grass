@@ -113,7 +113,7 @@ export class TerrainComponent extends entity.Component {
 
     const textureLoader = new THREE.TextureLoader();
     textureLoader.load(
-        './resources/textures/' + 'terrain.png',
+        './textures/' + 'terrain.png',
         (heightmapTexture) => {
       const heightmapGenerator = new Heightmap({
           dimensions: new THREE.Vector2(1.0, 1.0),
@@ -147,7 +147,7 @@ export class TerrainComponent extends entity.Component {
       heightmapTexture.colorSpace = THREE.LinearSRGBColorSpace;
 
       const LOAD_ = (name) => {
-        const albedo = textureLoader.load('./resources/textures/' + name);
+        const albedo = textureLoader.load('./textures/' + name);
         albedo.magFilter = THREE.LinearFilter;
         albedo.minFilter = THREE.LinearMipMapLinearFilter;
         albedo.wrapS = THREE.RepeatWrapping;
@@ -182,7 +182,7 @@ export class TerrainComponent extends entity.Component {
       
       const mountain = new entity.Entity();
       mountain.AddComponent(new render_component.RenderComponent({
-        resourcePath: './resources/models/',
+        resourcePath: './models/',
         resourceName: 'mountain.glb',
         scale: new THREE.Vector3(1, 1, 1),
         emissive: new THREE.Color(0x000000),

@@ -3,12 +3,16 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://simondevyoutube.github.io/Quick_Grass/",
   "scripts": {
+    "predeploy" : "npm run build",
+    "deploy" : "gh-pages -d dist",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
+    "gh-pages": "^6.0.0",
     "gltf-pipeline": "^4.1.0",
     "vite": "^4.4.9"
   },
@@ -16,7 +20,6 @@
     "@dimforge/rapier3d": "^0.11.2",
     "mersenne-twister": "^1.1.0",
     "n8ao": "^1.6.8",
-    "stats.js": "^0.17.0",
     "three": "^0.156.0",
     "vite-plugin-solid": "^2.7.0",
     "vite-plugin-top-level-await": "^1.3.0",

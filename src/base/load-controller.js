@@ -45,34 +45,6 @@ export const load_controller = (() => {
       return this.textures_[name].texture;
     }
 
-    LoadSound(path, name, onLoad) {
-      if (!(name in this.sounds_)) {
-        const loader = new THREE.AudioLoader();
-        loader.setPath(path);
-
-        loader.load(name, (buf) => {
-          this.sounds_[name] = {
-            buffer: buf
-          };
-          const threejs = this.FindEntity('threejs').GetComponent('ThreeJSController');
-          const s = new THREE.PositionalAudio(threejs.listener_);
-          s.setBuffer(buf);
-          s.setRefDistance(10);
-          s.setMaxDistance(500);
-          onLoad(s);
-          this.playing_.push(s);
-        });
-      } else {
-        const threejs = this.FindEntity('threejs').GetComponent('ThreeJSController');
-        const s = new THREE.PositionalAudio(threejs.listener_);
-        s.setBuffer(this.sounds_[name].buffer);
-        s.setRefDistance(25);
-        s.setMaxDistance(1000);
-        onLoad(s);
-        this.playing_.push(s);
-      }
-    }
-
     #FinalizeLoad_(group) {
       const threejsController = this.FindEntity('threejs').GetComponent('ThreeJSController');
 
