@@ -55,7 +55,6 @@ void main() {
   vec4 hashVal1 = hash42(vec2(grassBladeWorldPos.x, grassBladeWorldPos.z));
 
   float highLODOut = smoothstep(grassDraw.x * 0.5, grassDraw.x, distance(cameraPosition, grassBladeWorldPos));
-// hack lod
   float lodFadeIn = smoothstep(grassDraw.x, grassDraw.y, distance(cameraPosition, grassBladeWorldPos));
 
   // Check terrain type, maybe don't allow grass blade
@@ -68,11 +67,6 @@ void main() {
   float randomHeight = remap(hashVal1.z, 0.0, 1.0, 0.75, 1.5) * mix(1.0, 0.0, lodFadeIn) * isGrassAllowed * heightmapSampleHeight;
   float randomWidth = (1.0 - isSandy) * heightmapSampleHeight;
   float randomLean = remap(hashVal1.w, 0.0, 1.0, 0.1, 0.4);
-
-  // HACK
-  // randomHeight = 1.0;
-  // randomShade = 1.0;
-  // randomWidth = 1.0;
 
   vec2 hashGrassColour = hash22(vec2(grassBladeWorldPos.x, grassBladeWorldPos.z));
   float leanAnimation = noise12(vec2(time * 0.35) + grassBladeWorldPos.xz * 137.423) * 0.1;
@@ -96,9 +90,6 @@ void main() {
   float grassTotalWidthLow = 1.0 - heightPercent;
   float grassTotalWidth = grassSize.x * mix(grassTotalWidthHigh, grassTotalWidthLow, highLODOut) * randomWidth;
 
-// hack lod
-  // grassTotalWidth = grassSize.x * randomWidth;
-
   // Shift verts
   float x = (xSide - 0.5) * grassTotalWidth;
   float y = heightPercent * grassTotalHeight;
@@ -116,11 +107,6 @@ void main() {
   float playerLeanAngle = mix(0.0, 0.2, playerFalloff * linearstep(0.5, 0.0, windLeanAngle));
   vec3 grassToPlayer = normalize(vec3(playerPos.x, 0.0, playerPos.z) - vec3(grassBladeWorldPos.x, 0.0, grassBladeWorldPos.z));
   vec3 playerLeanAxis = vec3(grassToPlayer.z, 0, -grassToPlayer.x);
-
-// hack lod
-  // randomLean = 0.0;
-  // windLeanAngle = 0.0;
-  // leanAnimation = 0.0;
 
   randomLean += leanAnimation;
 
