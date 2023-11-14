@@ -441,7 +441,7 @@ export const threejs_component = (() => {
 
       const gl = this.#threejs_.getContext();
       const ext = gl.getExtension('EXT_disjoint_timer_query_webgl2');
-      if (this.timerQuery === null) {
+      if (this.timerQuery === null && ext !== null) {
         this.timerQuery = gl.createQuery();
         gl.beginQuery(ext.TIME_ELAPSED_EXT, this.timerQuery);
       }
