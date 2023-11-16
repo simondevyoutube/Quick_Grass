@@ -50,15 +50,15 @@ void main() {
   // vec3 baseColour = vec3(0.02, 0.2, 0.01);
   // vec3 tipColour = vec3(0.5, 0.5, 0.1);
 
-  vec3 baseColour = GAMMA_TO_LINEAR(vec3(0.05, 0.2, 0.01));
-  vec3 tipColour = GAMMA_TO_LINEAR(vec3(0.3, 0.3, 0.1));
+  vec3 baseColour = vec3(0.05, 0.2, 0.01);
+  vec3 tipColour = vec3(0.3, 0.3, 0.1);
 
   float aoDist = smoothstep(25.0, 50.0, distToVertex);
   float colourDist = smoothstep(50.0, 100.0, distToVertex);
-  float ao = mix(0.125, 1.0, aoDist);
+  float ao = mix(0.25, 1.0, aoDist);
   ao = mix(ao, 1.0, isSandy);
 
-  vec3 SAND_COLOUR = GAMMA_TO_LINEAR(vec3(0.6, 0.4, 0.2));
+  vec3 SAND_COLOUR = vec3(0.6, 0.4, 0.2);
 
   vTerrainColour = mix(baseColour, tipColour, colourDist);
   vTerrainColour = mix(vTerrainColour, SAND_COLOUR, smoothstep(-11.0, -14.0, height));

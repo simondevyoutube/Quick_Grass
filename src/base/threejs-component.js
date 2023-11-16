@@ -1,5 +1,4 @@
 import { THREE, RenderPass, ShaderPass, FXAAShader, ACESFilmicToneMappingShader } from './three-defs.js';
-import {N8AOPass} from "n8ao";
 
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 
@@ -19,7 +18,8 @@ const LIGHT_FAR = 1000.0;
 const GammaCorrectionShader2 = {
 	name: 'GammaCorrectionShader2',
 	uniforms: {
-		'tDiffuse': { value: null }
+		'tDiffuse': { value: null },
+    'exposure': { value: 1.0 },
 	},
 	vertexShader: /* glsl */`
 		varying vec2 vUv;
@@ -33,6 +33,8 @@ const GammaCorrectionShader2 = {
 		uniform sampler2D tDiffuse;
 		varying vec2 vUv;
 
+    #define saturate(a) clamp( a, 0.0, 1.0 )
+
     float inverseLerp(float minValue, float maxValue, float v) {
       return (v - minValue) / (maxValue - minValue);
     }
@@ -41,6 +43,44 @@ const GammaCorrectionShader2 = {
       float t = inverseLerp(inMin, inMax, v);
       return mix(outMin, outMax, t);
     }
+
+		uniform float exposure;
+
+		vec3 RRTAndODTFit( vec3 v ) {
+
+			vec3 a = v * ( v + 0.0245786 ) - 0.000090537;
+			vec3 b = v * ( 0.983729 * v + 0.4329510 ) + 0.238081;
+			return a / b;
+
+		}
+
+		vec3 ACESFilmicToneMapping( vec3 color ) {
+
+		// sRGB => XYZ => D65_2_D60 => AP1 => RRT_SAT
+			const mat3 ACESInputMat = mat3(
+				vec3( 0.59719, 0.07600, 0.02840 ), // transposed from source
+				vec3( 0.35458, 0.90834, 0.13383 ),
+				vec3( 0.04823, 0.01566, 0.83777 )
+			);
+
+		// ODT_SAT => XYZ => D60_2_D65 => sRGB
+			const mat3 ACESOutputMat = mat3(
+				vec3(  1.60475, -0.10208, -0.00327 ), // transposed from source
+				vec3( -0.53108,  1.10813, -0.07276 ),
+				vec3( -0.07367, -0.00605,  1.07602 )
+			);
+
+			color = ACESInputMat * color;
+
+		// Apply RRT and ODT
+			color = RRTAndODTFit( color );
+
+			color = ACESOutputMat * color;
+
+		// Clamp to [0, 1]
+			return saturate( color );
+
+		}
 
     vec3 vignette(vec2 uvs) {
       float v1 = smoothstep(0.5, 0.3, abs(uvs.x - 0.5));
@@ -53,6 +93,9 @@ const GammaCorrectionShader2 = {
 
 		void main() {
 			vec4 tex = texture2D( tDiffuse, vUv );
+
+      tex.rgb *= exposure / 0.6; // pre-exposed, outside of the tone mapping function
+      tex.rgb = ACESFilmicToneMapping( tex.rgb );
 
       tex = LinearTosRGB(tex);
       tex.rgb *= vignette(vUv);
@@ -297,16 +340,6 @@ export const threejs_component = (() => {
       this.writeBuffer_.depthTexture.type = THREE.UnsignedInt248Type;
 
       this.#opaquePass_ = new RenderPass(this.#opaqueScene_, this.#opaqueCamera_);
-      this.#ssaoPass_ = new N8AOPass(this.#opaqueScene_, this.#opaqueCamera_, this.writeBuffer_.width, this.writeBuffer_.height);
-      this.#ssaoPass_.configuration.aoRadius = 3.0;
-      this.#ssaoPass_.configuration.distanceFalloff = 0.25;
-      this.#ssaoPass_.configuration.intensity = 5.0;
-      this.#ssaoPass_.configuration.color = new THREE.Color(0, 0, 0);
-      // this.#ssaoPass_.configuration.halfRes = true;
-      this.#ssaoPass_.beautyRenderTarget.dispose();
-      this.#ssaoPass_.beautyRenderTarget = this.writeBuffer_;
-      this.#ssaoPass_.setQualityMode("High");
-
       this.#waterPass_ = new RenderPass(this.#waterScene_, this.#opaqueCamera_);
       this.#transparentPass_ = new RenderPass(this.#transparentScene_, this.#transparentCamera_);
 
@@ -388,8 +421,6 @@ export const threejs_component = (() => {
       this.readBuffer_.setSize(w, h);
       // this.csm_.updateFrustums();
 
-      this.#ssaoPass_.setSize(w, h);
-
       this.#waterTexturePass_.setSize(w, h);
 
       this.#fxaaPass_.material.uniforms['resolution'].value.x = 1 / w;
@@ -438,14 +469,6 @@ export const threejs_component = (() => {
       this.#threejs_.setRenderTarget(this.readBuffer_);
       this.#threejs_.clear();
       this.#threejs_.setRenderTarget(null);
-
-      const gl = this.#threejs_.getContext();
-      const ext = gl.getExtension('EXT_disjoint_timer_query_webgl2');
-      if (this.timerQuery === null && ext !== null) {
-        this.timerQuery = gl.createQuery();
-        gl.beginQuery(ext.TIME_ELAPSED_EXT, this.timerQuery);
-      }
-
       this.#opaquePass_.renderToScreen = false;
       this.#opaquePass_.render(this.#threejs_, null, this.writeBuffer_, timeElapsedS, false);
       this.writeBuffer_.ACTIVE_HAS_OPAQUE = true; 
@@ -456,41 +479,7 @@ export const threejs_component = (() => {
       this.#threejs_.autoClearColor = false;
       this.#threejs_.autoClearDepth = false;
       this.#threejs_.autoClearStencil = false;
-
-      if (this.timerQuery !== null) {
-        gl.endQuery(ext.TIME_ELAPSED_EXT);
-        gl.flush();
-        const available = gl.getQueryParameter(this.timerQuery, gl.QUERY_RESULT_AVAILABLE);
-        if (available) {
-          const elapsedTimeInNs = gl.getQueryParameter(this.timerQuery, gl.QUERY_RESULT);
-          const elapsedTimeInMs = elapsedTimeInNs / 1000000;
-          this.grassTimingAvg_ = this.grassTimingAvg_ * 0.9 + elapsedTimeInMs * 0.1;
-          // console.log(`Render time: ${this.grassTimingAvg_}ms`);
-          this.grassStats_.update(elapsedTimeInMs, 10);
-        }
-        this.timerQuery = null;
-      }
-
-      this.#ssaoPass_.clear = false;
-      this.#ssaoPass_.renderToScreen = false;
-      this.#ssaoPass_.beautyRenderTarget = this.readBuffer_;
-      this.#ssaoPass_.configuration.autoRenderBeauty = false;
-      this.#ssaoPass_.configuration.intensity = 5.0;
-      // this.#ssaoPass_.setDisplayMode("Split");
-      this.#ssaoPass_.render(this.#threejs_, this.writeBuffer_, null, timeElapsedS, false);
-      this.writeBuffer_.ACTIVE_HAS_SSAO_OPAQUE = true; 
-      this.readBuffer_.ACTIVE_HAS_SSAO_OPAQUE = false; 
       this.swapBuffers_();
-
-      // SSAO buffer has colour, but other one has depth, which I want to reuse
-      // Swapping them should work, but doesn't, and I don't feel like figuring out why.
-      this.#copyPass_.renderToScreen = false;
-      this.#copyPass_.clear = false;
-      this.#copyPass_.material.depthWrite = false;
-      this.#copyPass_.material.depthTest = false;
-      this.#copyPass_.render(this.#threejs_, this.writeBuffer_, this.readBuffer_, timeElapsedS, false);
-      this.writeBuffer_.ACTIVE_HAS_FINAL_OPAQUE = true; 
-      this.readBuffer_.ACTIVE_HAS_FINAL_OPAQUE = false; 
 
       this.#waterTexturePass_.clear = false;
       this.#waterTexturePass_.renderToScreen = false;
@@ -506,20 +495,6 @@ export const threejs_component = (() => {
       this.#transparentPass_.render(this.#threejs_, null, this.writeBuffer_, timeElapsedS, false);
       this.writeBuffer_.ACTIVE_HAS_WATER = true;
       this.readBuffer_.ACTIVE_HAS_WATER = false;
-      this.swapBuffers_();
-
-      this.#fxaaPass_.clear = false;
-      this.#fxaaPass_.render(this.#threejs_, this.writeBuffer_, this.readBuffer_, timeElapsedS, false);
-      this.swapBuffers_();
-
-      // SHADERPASS SWAPS ORDER OF READ/WRITE BUFFERS
-      this.#acesPass_.clear = false;
-      this.#acesPass_.material.uniforms.exposure.value = 1.0;
-      this.#acesPass_.material.depthTest = false;
-      this.#acesPass_.material.depthWrite = false;
-      this.#acesPass_.render(this.#threejs_, this.writeBuffer_, this.readBuffer_, timeElapsedS, false);
-      this.writeBuffer_.ACTIVE_HAS_ACES = true;
-      this.readBuffer_.ACTIVE_HAS_ACES = false;
       this.swapBuffers_();
 
       this.#gammaPass_.clear = false;
